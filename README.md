@@ -30,7 +30,7 @@ A modern, fully responsive **Invoice Generator Web App** built with Next.js, des
 ### 1️⃣ Clone the repository
 
 ```bash
-git clone https://github.com/your-username/invoice-generator.git
+git clone https://github.com/devinwildz/invoice-generator.git
 cd invoice-generator
 ```
 
