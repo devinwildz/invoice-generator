@@ -1,0 +1,34 @@
+import { redirect } from "next/navigation";
+import { getOptionalUser } from "@/lib/auth";
+import SignupForm from "@/components/auth/signup-form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+export default async function SignupPage() {
+  const user = await getOptionalUser();
+  if (user) redirect("/dashboard");
+
+  return (
+    <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+      <div className="space-y-4">
+        <p className="text-xs uppercase tracking-[0.4em] text-emerald-600">
+          Invoice Studio
+        </p>
+        <h1 className="text-4xl font-semibold text-slate-900">
+          Start invoicing smarter.
+        </h1>
+        <p className="text-base text-slate-600">
+          Create professional invoices, track payments, and export PDFs in a few
+          clicks.
+        </p>
+      </div>
+      <Card className="border-0 shadow-xl">
+        <CardHeader>
+          <CardTitle>Create account</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <SignupForm />
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
