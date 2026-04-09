@@ -1,5 +1,7 @@
 "use client";
 
+export const dynamic = "force-dynamic";
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -15,6 +17,14 @@ export default function VerifyPage() {
 
   useEffect(() => {
     const errorDescription = searchParams.get("error_description");
+    const hasToken =
+      searchParams.get("access_token") || searchParams.get("token_hash");
+
+    if (!hasToken && !errorDescription) {
+      setStatus("error");
+      setMessage("Verification link is missing or invalid.");
+      return;
+    }
     if (errorDescription) {
       setStatus("error");
       setMessage(decodeURIComponent(errorDescription));
@@ -69,7 +79,12 @@ export default function VerifyPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">{message}</p>
+          <div className="flex items-center gap-3">
+            {status === "loading" && (
+              <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-primary" />
+            )}
+            <p className="text-sm text-muted-foreground">{message}</p>
+          </div>
           {status === "error" && (
             <Link href="/login">
               <Button className="w-full">Go to login</Button>
