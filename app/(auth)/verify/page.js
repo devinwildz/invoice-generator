@@ -1,7 +1,6 @@
-"use client";
-
 export const dynamic = "force-dynamic";
 
+("use client");
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -34,7 +33,9 @@ export default function VerifyPage() {
     const supabase = createSupabaseBrowserClient();
     supabase.auth.getSession().then(({ data }) => {
       const user = data?.session?.user;
-      const isVerified = Boolean(user?.email_confirmed_at || user?.confirmed_at);
+      const isVerified = Boolean(
+        user?.email_confirmed_at || user?.confirmed_at,
+      );
 
       if (isVerified) {
         setStatus("success");
@@ -47,7 +48,7 @@ export default function VerifyPage() {
 
       setStatus("error");
       setMessage(
-        "Verification link is invalid or expired. Please log in to resend the verification email."
+        "Verification link is invalid or expired. Please log in to resend the verification email.",
       );
     });
   }, [router, searchParams]);
@@ -63,7 +64,10 @@ export default function VerifyPage() {
         </h1>
         <p className="text-base text-slate-600">{message}</p>
         {status === "error" && (
-          <Link className="text-sm font-medium text-primary hover:underline" href="/login">
+          <Link
+            className="text-sm font-medium text-primary hover:underline"
+            href="/login"
+          >
             Back to login
           </Link>
         )}
@@ -74,8 +78,8 @@ export default function VerifyPage() {
             {status === "loading"
               ? "Checking verification"
               : status === "success"
-              ? "Verified"
-              : "Verification failed"}
+                ? "Verified"
+                : "Verification failed"}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
