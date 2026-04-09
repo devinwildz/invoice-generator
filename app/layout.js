@@ -25,7 +25,7 @@ export default function RootLayout({ children }) {
       lang="en"
       className={`${manrope.variable} ${dmMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full bg-background text-foreground">
+      <body className=" bg-background text-foreground">
         <Providers>{children}</Providers>
       </body>
     </html>

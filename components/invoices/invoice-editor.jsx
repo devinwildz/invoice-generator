@@ -267,7 +267,7 @@ export default function InvoiceEditor({ mode, initialData }) {
                 type="file"
                 accept="image/*"
                 onChange={handleLogoChange}
-                className="block w-full text-sm text-muted-foreground file:mr-4 file:rounded-full file:border-0 file:bg-secondary file:px-4 file:py-2 file:text-xs file:font-semibold file:text-secondary-foreground hover:file:brightness-105"
+                className="block w-full text-sm mt-2 cursor-pointer text-muted-foreground file:mr-4 file:rounded-full file:border-0 file:bg-secondary file:px-4 file:py-2 file:text-xs file:font-semibold file:text-secondary-foreground hover:file:brightness-105"
               />
               {logoError && (
                 <p className="text-xs text-destructive">{logoError}</p>

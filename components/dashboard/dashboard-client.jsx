@@ -120,7 +120,7 @@ export default function DashboardClient() {
                   </TableCell>
                   <TableCell>{invoice.due_date}</TableCell>
                   <TableCell>
-                    <Badge variant={statusVariant[invoice.status] || "secondary"}>
+                    <Badge className="capitalize" variant={statusVariant[invoice.status] || "secondary"}>
                       {invoice.status}
                     </Badge>
                   </TableCell>
@@ -137,6 +137,7 @@ export default function DashboardClient() {
                       <Button
                         size="sm"
                         variant="ghost"
+                        className="text-destructive hover:text-destructive/80"
                         onClick={() => setPendingDelete(invoice)}
                         disabled={deleteMutation.isPending}
                       >

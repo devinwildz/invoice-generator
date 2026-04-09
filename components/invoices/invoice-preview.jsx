@@ -35,7 +35,7 @@ const InvoicePreview = React.forwardRef(function InvoicePreview(
             </div>
           )}
           <p
-            className="text-xs uppercase tracking-[0.2em]"
+            className="text-xs uppercase mb-1 tracking-[0.2em]"
             style={{ color: "#94a3b8" }}
           >
             Invoice

@@ -12,7 +12,7 @@ export default async function DashboardPage() {
           Overview
         </p>
         <h1 className="text-3xl font-semibold text-foreground">
-          Your invoices
+          Your Invoices
         </h1>
       </div>
       <DashboardClient />

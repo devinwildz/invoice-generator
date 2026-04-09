@@ -15,6 +15,7 @@ export default function ResetPasswordClient() {
   const [status, setStatus] = useState("loading");
   const [message, setMessage] = useState("Validating reset link...");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
@@ -23,7 +24,9 @@ export default function ResetPasswordClient() {
     const code = searchParams.get("code");
     const errorDescription = searchParams.get("error_description");
     const hasToken =
-      code || searchParams.get("access_token") || searchParams.get("token_hash");
+      code ||
+      searchParams.get("access_token") ||
+      searchParams.get("token_hash");
 
     if (!hasToken && !errorDescription) {
       setStatus("error");
@@ -93,17 +96,25 @@ export default function ResetPasswordClient() {
   };
 
   return (
-    <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+    <div className="grid gap-8 md:grid-cols-2">
       <div className="space-y-4">
-        <p className="text-xs uppercase tracking-[0.4em] text-blue-600">
-          Invoice Studio
-        </p>
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground font-semibold shadow-lg">
+            I O
+          </div>
+          <span className="text-sm uppercase tracking-[0.3em] text-muted-foreground">
+            Invoice Onlineinit
+          </span>
+        </div>
         <h1 className="text-4xl font-semibold text-slate-900">
           Reset your password.
         </h1>
         <p className="text-base text-slate-600">{message}</p>
         {status === "error" && (
-          <Link className="text-sm font-medium text-primary hover:underline" href="/login">
+          <Link
+            className="text-sm font-medium text-primary hover:underline"
+            href="/login"
+          >
             Back to login
           </Link>
         )}
@@ -117,20 +128,32 @@ export default function ResetPasswordClient() {
         <CardContent className="space-y-4">
           {status === "ready" ? (
             <form className="space-y-4" onSubmit={handleSubmit}>
-              <div className="space-y-2">
+              <div className="space-y-2 ">
                 <Label htmlFor="password">New password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                  />
+                  <button
+                    type="button"
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    className="absolute inset-y-0 right-0 flex cursor-pointer items-center px-3 text-xs font-medium text-muted-foreground hover:text-foreground"
+                  >
+                    {showPassword ? "Hide" : "Show"}
+                  </button>
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="confirm">Confirm password</Label>
                 <Input
                   id="confirm"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   value={confirm}
                   onChange={(event) => setConfirm(event.target.value)}
                 />
