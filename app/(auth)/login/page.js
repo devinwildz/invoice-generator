@@ -3,7 +3,9 @@ import { getOptionalUser } from "@/lib/auth";
 import LoginForm from "@/components/auth/login-form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default async function LoginPage() {
+export default async function LoginPage({ searchParams }) {
+  const params = await searchParams;
+  const verified = params?.verified === "1" || params?.verified === "true";
   const user = await getOptionalUser();
   if (user) redirect("/dashboard");
 
@@ -29,7 +31,7 @@ export default async function LoginPage() {
           <CardTitle>Sign in</CardTitle>
         </CardHeader>
         <CardContent>
-          <LoginForm />
+          <LoginForm verified={verified} />
         </CardContent>
       </Card>
     </div>

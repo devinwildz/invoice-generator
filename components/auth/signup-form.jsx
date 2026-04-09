@@ -1,15 +1,34 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import Link from "next/link";
 import { signupAction } from "@/app/(auth)/actions";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/toast-provider";
 
 export default function SignupForm() {
   const [state, formAction, pending] = useActionState(signupAction, null);
   const [showPassword, setShowPassword] = useState(false);
+  const [open, setOpen] = useState(false);
+  const { push } = useToast();
+
+  useEffect(() => {
+    if (state?.success) {
+      setOpen(true);
+      push("Verification email sent.", "success");
+    } else if (state?.error) {
+      push(state.error, "error");
+    }
+  }, [state, push]);
 
   return (
     <form action={formAction} className="space-y-4">
@@ -54,6 +73,23 @@ export default function SignupForm() {
           Sign in
         </Link>
       </p>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Check your email</DialogTitle>
+            <DialogDescription>
+              Verification link has been sent to your email. Please verify your
+              account before logging in.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-6">
+            <Link href="/login">
+              <Button className="w-full">Back to login</Button>
+            </Link>
+          </div>
+        </DialogContent>
+      </Dialog>
     </form>
   );
 }

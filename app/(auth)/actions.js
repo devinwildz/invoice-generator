@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { headers } from "next/headers";
 import { loginSchema, signupSchema } from "@/lib/validations";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -16,10 +17,18 @@ export async function loginAction(prevState, formData) {
   }
 
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
 
   if (error) {
     return { error: error.message };
+  }
+
+  const user = data?.user;
+  const isVerified = Boolean(user?.email_confirmed_at || user?.confirmed_at);
+
+  if (!isVerified) {
+    await supabase.auth.signOut();
+    return { error: "Please verify your email before logging in." };
   }
 
   redirect("/dashboard");
@@ -38,11 +47,16 @@ export async function signupAction(prevState, formData) {
   }
 
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.auth.signUp({
+  const headersList = await headers();
+  const origin =
+    headersList.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "";
+
+  const { data, error } = await supabase.auth.signUp({
     email: parsed.data.email,
     password: parsed.data.password,
     options: {
       data: { full_name: parsed.data.fullName },
+      ...(origin ? { emailRedirectTo: `${origin}/verify` } : {}),
     },
   });
 
@@ -50,7 +64,13 @@ export async function signupAction(prevState, formData) {
     return { error: error.message };
   }
 
-  redirect("/dashboard");
+  if (data?.session) {
+    await supabase.auth.signOut();
+  }
+  return {
+    success:
+      "Verification link has been sent to your email. Please verify your account before logging in.",
+  };
 }
 
 export async function resetPasswordAction(prevState, formData) {
@@ -69,4 +89,29 @@ export async function resetPasswordAction(prevState, formData) {
   }
 
   return { success: "Password reset email sent. Check your inbox." };
+}
+
+export async function resendVerificationAction(prevState, formData) {
+  const email = formData.get("email");
+  const parsed = loginSchema.pick({ email: true }).safeParse({ email });
+  if (!parsed.success) {
+    return { error: parsed.error.issues[0]?.message || "Invalid email." };
+  }
+
+  const supabase = await createSupabaseServerClient();
+  const headersList = await headers();
+  const origin =
+    headersList.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "";
+
+  const { error } = await supabase.auth.resend({
+    type: "signup",
+    email: parsed.data.email,
+    ...(origin ? { emailRedirectTo: `${origin}/verify` } : {}),
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return { success: "Verification email resent. Check your inbox." };
 }

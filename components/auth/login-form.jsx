@@ -1,61 +1,127 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import Link from "next/link";
-import { loginAction } from "@/app/(auth)/actions";
+import { loginAction, resendVerificationAction } from "@/app/(auth)/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/toast-provider";
 
-export default function LoginForm() {
+export default function LoginForm({ verified }) {
   const [state, formAction, pending] = useActionState(loginAction, null);
+  const [resendState, resendAction, resendPending] = useActionState(
+    resendVerificationAction,
+    null
+  );
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [cooldown, setCooldown] = useState(0);
+  const { push } = useToast();
+
+  useEffect(() => {
+    if (verified) {
+      push("Email verified successfully. You can now log in.", "success");
+    }
+  }, [verified, push]);
+
+  useEffect(() => {
+    if (state?.error) {
+      push(state.error, "error");
+    }
+  }, [state, push]);
+
+  useEffect(() => {
+    if (resendState?.success) {
+      push(resendState.success, "success");
+    } else if (resendState?.error) {
+      push(resendState.error, "error");
+    }
+  }, [resendState, push]);
+
+  useEffect(() => {
+    if (cooldown === 0) return;
+    const timer = setInterval(() => {
+      setCooldown((prev) => Math.max(prev - 1, 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldown]);
 
   return (
-    <form action={formAction} className="space-y-4">
-      <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
-        <Input className="mt-1.5" id="email" name="email" type="email" placeholder="Enter your email" />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="password">Password</Label>
-        <div className="relative">
+    <div className="space-y-4">
+      <form action={formAction} className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="email">Email</Label>
           <Input
-            id="password"
-            name="password"
-            type={showPassword ? "text" : "password"}
-            className="pr-12 mt-1.5"
-            placeholder="Enter your password"
+            className="mt-1.5"
+            id="email"
+            name="email"
+            type="email"
+            placeholder="Enter your email"
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
           />
-          <button
-            type="button"
-            aria-label={showPassword ? "Hide password" : "Show password"}
-            onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute inset-y-0 right-0 cursor-pointer flex items-center px-3 text-xs font-medium text-muted-foreground hover:text-foreground"
-          >
-            {showPassword ? "Hide" : "Show"}
-          </button>
         </div>
-      </div>
-      <div className="text-right">
-        <Link className="text-xs font-medium text-primary hover:underline" href="/reset-password">
-          Forgot password?
-        </Link>
-      </div>
-      {state?.error && (
-        <p className="rounded-md border border-[rgba(239,68,68,0.3)] bg-[rgba(239,68,68,0.1)] px-3 py-2 text-sm text-destructive">
-          {state.error}
-        </p>
-      )}
-      <Button className="w-full" disabled={pending}>
-        {pending ? "Signing in..." : "Sign in"}
-      </Button>
+        <div className="space-y-2">
+          <Label htmlFor="password">Password</Label>
+          <div className="relative">
+            <Input
+              id="password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              className="pr-12 mt-1.5"
+              placeholder="Enter your password"
+            />
+            <button
+              type="button"
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute inset-y-0 right-0 cursor-pointer flex items-center px-3 text-xs font-medium text-muted-foreground hover:text-foreground"
+            >
+              {showPassword ? "Hide" : "Show"}
+            </button>
+          </div>
+        </div>
+        <div className="text-right">
+          <Link
+            className="text-xs font-medium text-primary hover:underline"
+            href="/reset-password"
+          >
+            Forgot password?
+          </Link>
+        </div>
+        {state?.error && (
+          <p className="rounded-md border border-[rgba(239,68,68,0.3)] bg-[rgba(239,68,68,0.1)] px-3 py-2 text-sm text-destructive">
+            {state.error}
+          </p>
+        )}
+        <Button className="w-full" disabled={pending}>
+          {pending ? "Signing in..." : "Sign in"}
+        </Button>
+      </form>
+
+      <form action={resendAction} className="text-center">
+        <input type="hidden" name="email" value={email} />
+        <button
+          type="submit"
+          disabled={resendPending || !email || cooldown > 0}
+          onClick={() => setCooldown(10)}
+          className="text-xs font-medium text-primary hover:underline disabled:cursor-not-allowed disabled:text-muted-foreground"
+        >
+          {cooldown > 0
+            ? `Resend in ${cooldown}s`
+            : resendPending
+            ? "Sending..."
+            : "Resend verification email"}
+        </button>
+      </form>
+
       <p className="text-center text-sm text-muted-foreground">
         Don't have an account?{" "}
         <Link className="font-medium text-primary hover:underline" href="/signup">
           Create an account
         </Link>
       </p>
-    </form>
+    </div>
   );
 }
