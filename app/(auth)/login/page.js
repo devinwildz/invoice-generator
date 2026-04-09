@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 export default async function LoginPage({ searchParams }) {
   const params = await searchParams;
   const verified = params?.verified === "1" || params?.verified === "true";
+  const reset = params?.reset === "success";
   const user = await getOptionalUser();
   if (user) redirect("/dashboard");
 
@@ -31,7 +32,7 @@ export default async function LoginPage({ searchParams }) {
           <CardTitle>Sign in</CardTitle>
         </CardHeader>
         <CardContent>
-          <LoginForm verified={verified} />
+          <LoginForm verified={verified} resetSuccess={reset} />
         </CardContent>
       </Card>
     </div>

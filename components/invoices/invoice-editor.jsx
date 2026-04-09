@@ -20,6 +20,7 @@ const emptyParty = {
   email: "",
   address: "",
   phone: "",
+  logo: "",
 };
 
 function getToday() {
@@ -44,7 +45,7 @@ function buildInitialInvoice(initial) {
     items: [{ name: "Design services", quantity: 1, price: 0, total: 0 }],
     taxRate: 10,
     discount: 0,
-    notes: "Thank you for your business.",
+    notes: "",
     currency: "USD",
     status: "draft",
   };
@@ -56,6 +57,7 @@ export default function InvoiceEditor({ mode, initialData }) {
   const [errors, setErrors] = useState({});
   const [form, setForm] = useState(buildInitialInvoice(initialData));
   const [isExporting, setIsExporting] = useState(false);
+  const [logoError, setLogoError] = useState("");
 
   const createInvoiceMutation = useCreateInvoice();
   const updateInvoiceMutation = useUpdateInvoice();
@@ -78,6 +80,22 @@ export default function InvoiceEditor({ mode, initialData }) {
       },
     }));
   }, []);
+
+  const handleLogoChange = (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setLogoError("Logo must be an image file.");
+      event.target.value = "";
+      return;
+    }
+    setLogoError("");
+    const reader = new FileReader();
+    reader.onload = () => {
+      updateParty("sender", "logo", reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const updateItem = useCallback((index, field, value) => {
     setForm((prev) => {
@@ -167,7 +185,7 @@ export default function InvoiceEditor({ mode, initialData }) {
   const isSaving = createInvoiceMutation.isPending || updateInvoiceMutation.isPending;
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+    <div className="grid gap-6 lg:grid-cols-[1.1fr_1.5fr]">
       <div className="space-y-6">
         <Card>
           <CardHeader>
@@ -199,6 +217,7 @@ export default function InvoiceEditor({ mode, initialData }) {
               <div className="space-y-2">
                 <Label htmlFor="issueDate">Issue date</Label>
                 <Input
+                  className="justify-between"
                   id="issueDate"
                   type="date"
                   value={form.issueDate}
@@ -241,18 +260,52 @@ export default function InvoiceEditor({ mode, initialData }) {
             <CardTitle>Sender</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2">
-            {Object.entries(form.sender).map(([key, value]) => (
-              <div className="space-y-2" key={`sender-${key}`}>
-                <Label htmlFor={`sender-${key}`}>
-                  {key.charAt(0).toUpperCase() + key.slice(1)}
-                </Label>
-                <Input
-                  id={`sender-${key}`}
-                  value={value}
-                  onChange={(event) => updateParty("sender", key, event.target.value)}
-                />
-              </div>
-            ))}
+            <div className="space-y-2 md:col-span-2">
+              <Label htmlFor="sender-logo">Company logo</Label>
+              <input
+                id="sender-logo"
+                type="file"
+                accept="image/*"
+                onChange={handleLogoChange}
+                className="block w-full text-sm text-muted-foreground file:mr-4 file:rounded-full file:border-0 file:bg-secondary file:px-4 file:py-2 file:text-xs file:font-semibold file:text-secondary-foreground hover:file:brightness-105"
+              />
+              {logoError && (
+                <p className="text-xs text-destructive">{logoError}</p>
+              )}
+              {form.sender.logo && (
+                <div className="mt-2 flex items-center gap-3">
+                  <img
+                    src={form.sender.logo}
+                    alt="Logo preview"
+                    className="h-12 w-12 rounded-lg border border-border object-contain"
+                  />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => updateParty("sender", "logo", "")}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              )}
+            </div>
+            {Object.entries(form.sender)
+              .filter(([key]) => key !== "logo")
+              .map(([key, value]) => (
+                <div className="space-y-2" key={`sender-${key}`}>
+                  <Label htmlFor={`sender-${key}`}>
+                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                  </Label>
+                  <Input
+                    id={`sender-${key}`}
+                    value={value}
+                    onChange={(event) =>
+                      updateParty("sender", key, event.target.value)
+                    }
+                  />
+                </div>
+              ))}
           </CardContent>
         </Card>
 
@@ -321,6 +374,7 @@ export default function InvoiceEditor({ mode, initialData }) {
                 <div className="flex items-end">
                   <Button
                     variant="ghost"
+                    className= "cursor-pointer"
                     size="icon"
                     onClick={() => removeItem(index)}
                     disabled={form.items.length === 1}
@@ -377,6 +431,8 @@ export default function InvoiceEditor({ mode, initialData }) {
           <CardContent>
             <Textarea
               value={form.notes}
+              maxLength={200}
+              placeholder="Additional notes or terms (max 200 characters)"
               onChange={(event) => updateField("notes", event.target.value)}
             />
           </CardContent>

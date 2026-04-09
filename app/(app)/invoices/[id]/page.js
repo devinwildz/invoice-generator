@@ -37,6 +37,7 @@ export default async function EditInvoicePage({ params }) {
       email: "",
       address: "",
       phone: "",
+      logo: "",
       ...(invoice.sender ?? {}),
     },
     client: {

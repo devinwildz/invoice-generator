@@ -53,19 +53,19 @@ export default function DashboardClient() {
             />
           </div>
           <select
-            className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground"
+            className="h-10 cursor-pointer rounded-md border border-input bg-background px-3 text-sm text-foreground"
             value={status}
             onChange={(event) => setStatus(event.target.value)}
           >
-            <option value="all">All statuses</option>
-            <option value="draft">Draft</option>
-            <option value="sent">Sent</option>
-            <option value="paid">Paid</option>
+            <option className="cursor-pointer" value="all">All status</option>
+            <option className="cursor-pointer" value="draft">Draft</option>
+            <option className="cursor-pointer" value="sent">Sent</option>
+            <option className="cursor-pointer" value="paid">Paid</option>
           </select>
           <Link href="/invoices/new">
             <Button>New Invoice</Button>
           </Link>
-        </CardContent>
+        </CardContent> 
       </Card>
 
       <Card>

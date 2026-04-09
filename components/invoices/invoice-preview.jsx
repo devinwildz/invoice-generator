@@ -5,7 +5,7 @@ import { formatCurrency } from "@/lib/invoice";
 
 const InvoicePreview = React.forwardRef(function InvoicePreview(
   { invoice, totals },
-  ref
+  ref,
 ) {
   const { sender, client, items, invoiceNumber, issueDate, dueDate, currency } =
     invoice;
@@ -25,12 +25,22 @@ const InvoicePreview = React.forwardRef(function InvoicePreview(
         style={{ borderBottom: "1px solid #e2e8f0" }}
       >
         <div>
+          {sender.logo && (
+            <div className="flex items-start mb-5">
+              <img
+                src={sender.logo}
+                alt="Sender logo"
+                className="h-12 object-contain"
+              />
+            </div>
+          )}
           <p
             className="text-xs uppercase tracking-[0.2em]"
             style={{ color: "#94a3b8" }}
           >
             Invoice
           </p>
+
           <h2 className="text-3xl font-semibold" style={{ color: "#0f172a" }}>
             {invoiceNumber}
           </h2>
@@ -60,7 +70,10 @@ const InvoicePreview = React.forwardRef(function InvoicePreview(
           >
             Total due
           </p>
-          <p className="mt-2 text-3xl font-semibold" style={{ color: "#0f172a" }}>
+          <p
+            className="mt-2 text-3xl font-semibold"
+            style={{ color: "#0f172a" }}
+          >
             {formatCurrency(totals.total, currency)}
           </p>
         </div>
@@ -75,10 +88,10 @@ const InvoicePreview = React.forwardRef(function InvoicePreview(
             From
           </p>
           <div className="mt-3 space-y-1 text-sm" style={{ color: "#334155" }}>
-            <p className="font-semibold" style={{ color: "#0f172a" }}>
+            <p className="font-semibold wrap-break-word" style={{ color: "#0f172a" }}>
               {sender.name}
             </p>
-            <p>{sender.address}</p>
+            <p className="wrap-break-word">{sender.address}</p>
             <p>{sender.email}</p>
             <p>{sender.phone}</p>
           </div>
@@ -92,10 +105,10 @@ const InvoicePreview = React.forwardRef(function InvoicePreview(
             Bill to
           </p>
           <div className="mt-3 space-y-1 text-sm" style={{ color: "#334155" }}>
-            <p className="font-semibold" style={{ color: "#0f172a" }}>
+            <p className="font-semibold wrap-break-word" style={{ color: "#0f172a" }}>
               {client.name}
             </p>
-            <p>{client.address}</p>
+            <p className="wrap-break-word">{client.address}</p>
             <p>{client.email}</p>
             <p>{client.phone}</p>
           </div>
@@ -127,10 +140,16 @@ const InvoicePreview = React.forwardRef(function InvoicePreview(
                 <td className="px-4 py-3" style={{ color: "#334155" }}>
                   {item.name}
                 </td>
-                <td className="px-4 py-3 text-right" style={{ color: "#475569" }}>
+                <td
+                  className="px-4 py-3 text-right"
+                  style={{ color: "#475569" }}
+                >
                   {item.quantity}
                 </td>
-                <td className="px-4 py-3 text-right" style={{ color: "#475569" }}>
+                <td
+                  className="px-4 py-3 text-right"
+                  style={{ color: "#475569" }}
+                >
                   {formatCurrency(item.price, currency)}
                 </td>
                 <td
@@ -158,7 +177,10 @@ const InvoicePreview = React.forwardRef(function InvoicePreview(
           </p>
           <p className="mt-2 whitespace-pre-line">{invoice.notes || "-"}</p>
         </div>
-        <div className="w-full max-w-xs space-y-2 text-sm" style={{ color: "#334155" }}>
+        <div
+          className="w-full max-w-xs space-y-2 text-sm"
+          style={{ color: "#334155" }}
+        >
           <div className="flex items-center justify-between">
             <span>Subtotal</span>
             <span className="font-medium" style={{ color: "#0f172a" }}>

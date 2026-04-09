@@ -10,9 +10,14 @@ export default async function SignupPage() {
   return (
     <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
       <div className="space-y-4">
-        <p className="text-xs uppercase tracking-[0.4em] text-emerald-600">
-          Invoice Studio
-        </p>
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground font-semibold shadow-lg">
+            IO
+          </div>
+          <span className="text-sm uppercase tracking-[0.3em] text-muted-foreground">
+            Invoice Onlineinit
+          </span>
+        </div>
         <h1 className="text-4xl font-semibold text-slate-900">
           Start invoicing smarter.
         </h1>
@@ -23,7 +28,7 @@ export default async function SignupPage() {
       </div>
       <Card className="border-0 shadow-xl">
         <CardHeader>
-          <CardTitle>Create account</CardTitle>
+          <CardTitle>Create your account</CardTitle>
         </CardHeader>
         <CardContent>
           <SignupForm />

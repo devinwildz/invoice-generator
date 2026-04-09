@@ -13,32 +13,27 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/toast-provider";
 
 export default function SignupForm() {
   const [state, formAction, pending] = useActionState(signupAction, null);
   const [showPassword, setShowPassword] = useState(false);
   const [open, setOpen] = useState(false);
-  const { push } = useToast();
 
   useEffect(() => {
     if (state?.success) {
       setOpen(true);
-      push("Verification email sent.", "success");
-    } else if (state?.error) {
-      push(state.error, "error");
     }
-  }, [state, push]);
+  }, [state]);
 
   return (
     <form action={formAction} className="space-y-4">
       <div className="space-y-2">
         <Label htmlFor="fullName">Full name</Label>
-        <Input id="fullName" name="fullName" placeholder="Alex Johnson" />
+        <Input className="mt-1.5" id="fullName" name="fullName" placeholder="Enter your full name" />
       </div>
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
-        <Input id="email" name="email" type="email" placeholder="you@company.com" />
+        <Input className="mt-1.5" id="email" name="email" type="email" placeholder="Enter your email" />
       </div>
       <div className="space-y-2">
         <Label htmlFor="password">Password</Label>
@@ -47,13 +42,14 @@ export default function SignupForm() {
             id="password"
             name="password"
             type={showPassword ? "text" : "password"}
-            className="pr-12"
+            className="pr-12 mt-1.5"
+            placeholder="Enter your password"
           />
           <button
             type="button"
             aria-label={showPassword ? "Hide password" : "Show password"}
             onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute inset-y-0 right-0 flex items-center px-3 text-xs font-medium text-muted-foreground hover:text-foreground"
+            className="absolute inset-y-0 right-0 flex cursor-pointer items-center px-3 text-xs font-medium text-muted-foreground hover:text-foreground"
           >
             {showPassword ? "Hide" : "Show"}
           </button>

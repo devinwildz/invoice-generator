@@ -6,9 +6,8 @@ import { loginAction, resendVerificationAction } from "@/app/(auth)/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/components/ui/toast-provider";
 
-export default function LoginForm({ verified }) {
+export default function LoginForm({ verified, resetSuccess }) {
   const [state, formAction, pending] = useActionState(loginAction, null);
   const [resendState, resendAction, resendPending] = useActionState(
     resendVerificationAction,
@@ -17,27 +16,6 @@ export default function LoginForm({ verified }) {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [cooldown, setCooldown] = useState(0);
-  const { push } = useToast();
-
-  useEffect(() => {
-    if (verified) {
-      push("Email verified successfully. You can now log in.", "success");
-    }
-  }, [verified, push]);
-
-  useEffect(() => {
-    if (state?.error) {
-      push(state.error, "error");
-    }
-  }, [state, push]);
-
-  useEffect(() => {
-    if (resendState?.success) {
-      push(resendState.success, "success");
-    } else if (resendState?.error) {
-      push(resendState.error, "error");
-    }
-  }, [resendState, push]);
 
   useEffect(() => {
     if (cooldown === 0) return;
@@ -83,13 +61,13 @@ export default function LoginForm({ verified }) {
           </div>
         </div>
         <div className="text-right">
-          <Link
-            className="text-xs font-medium text-primary hover:underline"
-            href="/reset-password"
-          >
-            Forgot password?
-          </Link>
-        </div>
+        <Link
+          className="text-xs font-medium text-primary hover:underline"
+          href="/forgot-password"
+        >
+          Forgot password?
+        </Link>
+      </div>
         {state?.error && (
           <p className="rounded-md border border-[rgba(239,68,68,0.3)] bg-[rgba(239,68,68,0.1)] px-3 py-2 text-sm text-destructive">
             {state.error}
@@ -100,21 +78,26 @@ export default function LoginForm({ verified }) {
         </Button>
       </form>
 
-      <form action={resendAction} className="text-center">
-        <input type="hidden" name="email" value={email} />
-        <button
-          type="submit"
-          disabled={resendPending || !email || cooldown > 0}
-          onClick={() => setCooldown(10)}
-          className="text-xs font-medium text-primary hover:underline disabled:cursor-not-allowed disabled:text-muted-foreground"
-        >
-          {cooldown > 0
-            ? `Resend in ${cooldown}s`
-            : resendPending
-            ? "Sending..."
-            : "Resend verification email"}
-        </button>
-      </form>
+      {state?.code === "email_not_confirmed" && (
+        <div className="space-y-2 rounded-lg border border-border bg-white/70 p-3 text-center text-xs text-muted-foreground">
+          <p>Your email is not verified. Resend verification email?</p>
+          <form action={resendAction}>
+            <input type="hidden" name="email" value={email} />
+            <button
+              type="submit"
+              disabled={resendPending || !email || cooldown > 0}
+              onClick={() => setCooldown(10)}
+              className="text-xs font-medium text-primary hover:underline disabled:cursor-not-allowed disabled:text-muted-foreground"
+            >
+              {cooldown > 0
+                ? `Resend in ${cooldown}s`
+                : resendPending
+                ? "Sending..."
+                : "Resend Verification Email"}
+            </button>
+          </form>
+        </div>
+      )}
 
       <p className="text-center text-sm text-muted-foreground">
         Don't have an account?{" "}

@@ -22,15 +22,17 @@ export default function AppHeader({ user }) {
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground font-semibold shadow-lg">
             IG
           </div>
-          <div>
+          <Link href="/">
             <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">
-              Invoice Studio
+              Invoice Onlineinit
             </p>
             <p className="text-lg font-semibold text-foreground">Dashboard</p>
-          </div>
+          </Link>
         </div>
 
         <div className="flex items-center gap-3">
+
+          
           <div className="hidden text-right sm:block">
             <p className="text-sm font-medium text-foreground">{user.fullName}</p>
             <p className="text-xs text-muted-foreground">{user.email}</p>

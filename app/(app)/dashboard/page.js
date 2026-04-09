@@ -8,7 +8,7 @@ export default async function DashboardPage() {
   return (
     <AppShell user={user}>
       <div className="mb-6">
-        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+        <p className="text-xs uppercase tracking-[0.3em] mb-1 text-muted-foreground">
           Overview
         </p>
         <h1 className="text-3xl font-semibold text-foreground">

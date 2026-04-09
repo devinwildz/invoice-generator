@@ -19,7 +19,7 @@ export default async function NewInvoicePage() {
     invoiceNumber: generateInvoiceNumber(),
     issueDate: getToday(),
     dueDate: getDueDate(),
-    sender: { name: "", email: "", address: "", phone: "" },
+    sender: { name: "", email: "", address: "", phone: "", logo: "" },
     client: { name: "", email: "", address: "", phone: "" },
     items: [{ name: "Design services", quantity: 1, price: 0, total: 0 }],
     taxRate: 10,

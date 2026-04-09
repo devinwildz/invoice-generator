@@ -20,7 +20,11 @@ export async function loginAction(prevState, formData) {
   const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
 
   if (error) {
-    return { error: error.message };
+    const message = error.message || "Login failed.";
+    if (message.toLowerCase().includes("email not confirmed")) {
+      return { error: "Your email is not verified.", code: "email_not_confirmed" };
+    }
+    return { error: message };
   }
 
   const user = data?.user;
@@ -73,7 +77,7 @@ export async function signupAction(prevState, formData) {
   };
 }
 
-export async function resetPasswordAction(prevState, formData) {
+export async function requestPasswordResetAction(prevState, formData) {
   const email = formData.get("email");
 
   const parsed = loginSchema.pick({ email: true }).safeParse({ email });
@@ -82,7 +86,14 @@ export async function resetPasswordAction(prevState, formData) {
   }
 
   const supabase = await createSupabaseServerClient();
-  const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email);
+  const headersList = await headers();
+  const origin =
+    headersList.get("origin") || process.env.NEXT_PUBLIC_APP_URL || "";
+
+  const { error } = await supabase.auth.resetPasswordForEmail(
+    parsed.data.email,
+    origin ? { redirectTo: `${origin}/reset-password` } : undefined
+  );
 
   if (error) {
     return { error: error.message };

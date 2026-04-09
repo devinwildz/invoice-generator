@@ -1,13 +1,16 @@
 "use client";
 
 import { useActionState } from "react";
-import { resetPasswordAction } from "@/app/(auth)/actions";
+import { requestPasswordResetAction } from "@/app/(auth)/actions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export default function ResetPasswordForm() {
-  const [state, formAction, pending] = useActionState(resetPasswordAction, null);
+export default function ForgotPasswordForm() {
+  const [state, formAction, pending] = useActionState(
+    requestPasswordResetAction,
+    null
+  );
 
   return (
     <form action={formAction} className="space-y-4">

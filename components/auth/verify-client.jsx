@@ -15,8 +15,9 @@ export default function VerifyClient() {
 
   useEffect(() => {
     const errorDescription = searchParams.get("error_description");
+    const code = searchParams.get("code");
     const hasToken =
-      searchParams.get("access_token") || searchParams.get("token_hash");
+      code || searchParams.get("access_token") || searchParams.get("token_hash");
 
     if (!hasToken && !errorDescription) {
       setStatus("error");
@@ -30,9 +31,13 @@ export default function VerifyClient() {
     }
 
     const supabase = createSupabaseBrowserClient();
-    supabase.auth.getSession().then(({ data }) => {
+
+    const finalize = async () => {
+      const { data } = await supabase.auth.getSession();
       const user = data?.session?.user;
-      const isVerified = Boolean(user?.email_confirmed_at || user?.confirmed_at);
+      const isVerified = Boolean(
+        user?.email_confirmed_at || user?.confirmed_at
+      );
 
       if (isVerified) {
         setStatus("success");
@@ -47,7 +52,20 @@ export default function VerifyClient() {
       setMessage(
         "Verification link is invalid or expired. Please log in to resend the verification email."
       );
-    });
+    };
+
+    if (code) {
+      supabase.auth
+        .exchangeCodeForSession(code)
+        .then(() => finalize())
+        .catch(() => {
+          setStatus("error");
+          setMessage("Verification link is invalid or expired.");
+        });
+      return;
+    }
+
+    finalize();
   }, [router, searchParams]);
 
   return (

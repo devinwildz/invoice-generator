@@ -1,8 +1,81 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import ResetPasswordForm from "@/components/auth/reset-password-form";
+import { useRouter, useSearchParams } from "next/navigation";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function ResetPasswordPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [status, setStatus] = useState("loading");
+  const [message, setMessage] = useState("Validating reset link...");
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    const hasToken =
+      searchParams.get("access_token") || searchParams.get("token_hash");
+    const errorDescription = searchParams.get("error_description");
+
+    if (!hasToken && !errorDescription) {
+      setStatus("error");
+      setMessage("Reset link is missing or invalid.");
+      return;
+    }
+    if (errorDescription) {
+      setStatus("error");
+      setMessage(decodeURIComponent(errorDescription));
+      return;
+    }
+
+    const supabase = createSupabaseBrowserClient();
+    supabase.auth.getSession().then(({ data }) => {
+      if (data?.session) {
+        setStatus("ready");
+        setMessage("Set a new password for your account.");
+      } else {
+        setStatus("error");
+        setMessage("Reset link is invalid or expired.");
+      }
+    });
+  }, [searchParams]);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError("");
+
+    if (!password || password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+    if (password !== confirm) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setSaving(true);
+    const supabase = createSupabaseBrowserClient();
+    const { error: updateError } = await supabase.auth.updateUser({
+      password,
+    });
+    setSaving(false);
+
+    if (updateError) {
+      setError(updateError.message);
+      return;
+    }
+
+    await supabase.auth.signOut();
+    router.replace("/login?reset=success");
+  };
+
   return (
     <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
       <div className="space-y-4">
@@ -12,19 +85,52 @@ export default function ResetPasswordPage() {
         <h1 className="text-4xl font-semibold text-slate-900">
           Reset your password.
         </h1>
-        <p className="text-base text-slate-600">
-          Enter your email and we’ll send a secure link to reset your password.
-        </p>
-        <Link className="text-sm font-medium text-primary hover:underline" href="/login">
-          Back to login
-        </Link>
+        <p className="text-base text-slate-600">{message}</p>
+        {status === "error" && (
+          <Link className="text-sm font-medium text-primary hover:underline" href="/login">
+            Back to login
+          </Link>
+        )}
       </div>
       <Card className="border-0 shadow-xl">
         <CardHeader>
-          <CardTitle>Forgot password</CardTitle>
+          <CardTitle>
+            {status === "ready" ? "Choose a new password" : "Reset status"}
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          <ResetPasswordForm />
+        <CardContent className="space-y-4">
+          {status === "ready" ? (
+            <form className="space-y-4" onSubmit={handleSubmit}>
+              <div className="space-y-2">
+                <Label htmlFor="password">New password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(event) => setPassword(event.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirm">Confirm password</Label>
+                <Input
+                  id="confirm"
+                  type="password"
+                  value={confirm}
+                  onChange={(event) => setConfirm(event.target.value)}
+                />
+              </div>
+              {error && (
+                <p className="rounded-md border border-[rgba(239,68,68,0.3)] bg-[rgba(239,68,68,0.1)] px-3 py-2 text-sm text-destructive">
+                  {error}
+                </p>
+              )}
+              <Button className="w-full" disabled={saving}>
+                {saving ? "Updating..." : "Update password"}
+              </Button>
+            </form>
+          ) : (
+            <p className="text-sm text-muted-foreground">{message}</p>
+          )}
         </CardContent>
       </Card>
     </div>
