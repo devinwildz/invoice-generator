@@ -105,11 +105,6 @@ export default async function HomePage() {
               </div>
             </div>
           </main>
-
-          {/* <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-[rgba(255,255,255,0.7)] py-6 text-sm text-slate-500">
-          <span>Built with Next.js + Supabase</span>
-          <span>Invoice Studio, 2026</span>
-        </footer> */}
         </div>
       </div>
     </>

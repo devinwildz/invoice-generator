@@ -2,11 +2,16 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { Button } from "@/components/ui/button";
+import { Home, User, History, LogOut } from "lucide-react";
 
 export default function AppHeader({ user }) {
   const router = useRouter();
+  const [open, setOpen] = useState(false);
+
+  const firstName = user?.fullName?.split(" ")[0] || "User";
+  const initial = firstName.charAt(0).toUpperCase();
 
   const handleSignOut = async () => {
     const supabase = createSupabaseBrowserClient();
@@ -15,9 +20,20 @@ export default function AppHeader({ user }) {
     router.refresh();
   };
 
+  // ✅ outside click close
+  useEffect(() => {
+    const handleClickOutside = () => setOpen(false);
+    if (open) {
+      document.addEventListener("click", handleClickOutside);
+    }
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [open]);
+
   return (
-    <header className="border-b border-border bg-[rgba(255,255,255,0.7)] backdrop-blur">
+    <header className="relative z-50 border-b border-border bg-white">
       <div className="mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-4">
+        
+        {/* LEFT */}
         <div className="flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground font-semibold shadow-lg">
             I O
@@ -30,16 +46,69 @@ export default function AppHeader({ user }) {
           </Link>
         </div>
 
-        <div className="flex items-center gap-3">
-
+        {/* RIGHT */}
+        <div className="relative flex items-center gap-3">
           
+          {/* ✅ Desktop only */}
           <div className="hidden text-right sm:block">
-            <p className="text-sm font-medium text-foreground">{user.fullName}</p>
-            <p className="text-xs text-muted-foreground">{user.email}</p>
+            <p className="text-sm font-medium text-foreground">
+              Hello, 👋 {firstName}
+            </p>
           </div>
-          <Button variant="outline" size="sm" onClick={handleSignOut}>
-            Sign out
-          </Button>
+
+          {/* Avatar */}
+          <div
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpen(!open);
+            }}
+            className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-primary text-white font-semibold"
+          >
+            {initial}
+          </div>
+
+          {/* Dropdown */}
+          {open && (
+            <div className="absolute right-0 top-12 z-[999] w-52 rounded-xl border bg-white shadow-lg">
+              
+              {/* ✅ Mobile user info */}
+              <div className="sm:hidden px-4 py-3 border-b">
+                <p className="text-sm font-medium">Hello, {firstName}</p>
+                <p className="text-xs text-muted-foreground">
+                  {user.email}
+                </p>
+              </div>
+
+              <Link href="/">
+                <div className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer">
+                  <Home size={16} />
+                  Home
+                </div>
+              </Link>
+
+              <Link href="/my-account">
+                <div className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer">
+                  <User size={16} />
+                  My Account
+                </div>
+              </Link>
+
+              <Link href="/dashboard">
+                <div className="flex items-center gap-2 px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer">
+                  <History size={16} />
+                  History
+                </div>
+              </Link>
+
+              <button
+                onClick={handleSignOut}
+                className="flex w-full cursor-pointer items-center gap-2 text-left px-4 py-2 text-sm text-red-500 hover:bg-gray-100"
+              >
+                <LogOut size={16} />
+                Sign out
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>

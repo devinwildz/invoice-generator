@@ -1,6 +1,7 @@
 import { Manrope, DM_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/providers";
+import AppFooter from "@/components/app/app-footer";
 
 const manrope = Manrope({
   variable: "--font-sans",
@@ -27,7 +28,9 @@ export default function RootLayout({ children }) {
     >
       <body className=" bg-background text-foreground">
         <Providers>{children}</Providers>
+        <AppFooter />
       </body>
+      
     </html>
   );
 }

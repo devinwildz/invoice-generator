@@ -32,10 +32,10 @@ export default async function NewInvoicePage() {
   return (
     <AppShell user={user}>
       <div className="mb-6">
-        <p className="text-xs uppercase tracking-[0.3em] text-muted-foreground">
+        <p className="text-xs uppercase mb-1 tracking-[0.3em] text-muted-foreground">
           New invoice
         </p>
-        <h1 className="text-3xl font-semibold text-foreground">
+        <h1 className="text-3xl capitalize font-semibold text-foreground">
           Create a professional invoice
         </h1>
       </div>

@@ -64,7 +64,7 @@ export default function InvoiceEditor({ mode, initialData }) {
 
   const totals = useMemo(
     () => calculateTotals(form.items, form.taxRate, form.discount),
-    [form.items, form.taxRate, form.discount]
+    [form.items, form.taxRate, form.discount],
   );
 
   const updateField = useCallback((field, value) => {
@@ -182,14 +182,15 @@ export default function InvoiceEditor({ mode, initialData }) {
     router.refresh();
   };
 
-  const isSaving = createInvoiceMutation.isPending || updateInvoiceMutation.isPending;
+  const isSaving =
+    createInvoiceMutation.isPending || updateInvoiceMutation.isPending;
 
   return (
     <div className="grid gap-6 lg:grid-cols-[1.1fr_1.5fr]">
       <div className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Invoice details</CardTitle>
+            <CardTitle>Invoice Details</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
@@ -198,7 +199,9 @@ export default function InvoiceEditor({ mode, initialData }) {
                 <Input
                   id="invoiceNumber"
                   value={form.invoiceNumber}
-                  onChange={(event) => updateField("invoiceNumber", event.target.value)}
+                  onChange={(event) =>
+                    updateField("invoiceNumber", event.target.value)
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -207,7 +210,9 @@ export default function InvoiceEditor({ mode, initialData }) {
                   id="status"
                   className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground"
                   value={form.status}
-                  onChange={(event) => updateField("status", event.target.value)}
+                  onChange={(event) =>
+                    updateField("status", event.target.value)
+                  }
                 >
                   <option value="draft">Draft</option>
                   <option value="sent">Sent</option>
@@ -221,7 +226,9 @@ export default function InvoiceEditor({ mode, initialData }) {
                   id="issueDate"
                   type="date"
                   value={form.issueDate}
-                  onChange={(event) => updateField("issueDate", event.target.value)}
+                  onChange={(event) =>
+                    updateField("issueDate", event.target.value)
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -230,7 +237,9 @@ export default function InvoiceEditor({ mode, initialData }) {
                   id="dueDate"
                   type="date"
                   value={form.dueDate}
-                  onChange={(event) => updateField("dueDate", event.target.value)}
+                  onChange={(event) =>
+                    updateField("dueDate", event.target.value)
+                  }
                 />
               </div>
               <div className="space-y-2">
@@ -239,7 +248,9 @@ export default function InvoiceEditor({ mode, initialData }) {
                   id="currency"
                   className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground"
                   value={form.currency}
-                  onChange={(event) => updateField("currency", event.target.value)}
+                  onChange={(event) =>
+                    updateField("currency", event.target.value)
+                  }
                 >
                   <option value="USD">USD - US Dollar</option>
                   <option value="EUR">EUR - Euro</option>
@@ -257,7 +268,7 @@ export default function InvoiceEditor({ mode, initialData }) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Sender</CardTitle>
+            <CardTitle>From</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2 md:col-span-2">
@@ -311,7 +322,7 @@ export default function InvoiceEditor({ mode, initialData }) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Client</CardTitle>
+            <CardTitle>Bill To</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2">
             {Object.entries(form.client).map(([key, value]) => (
@@ -322,7 +333,9 @@ export default function InvoiceEditor({ mode, initialData }) {
                 <Input
                   id={`client-${key}`}
                   value={value}
-                  onChange={(event) => updateParty("client", key, event.target.value)}
+                  onChange={(event) =>
+                    updateParty("client", key, event.target.value)
+                  }
                 />
               </div>
             ))}
@@ -331,19 +344,21 @@ export default function InvoiceEditor({ mode, initialData }) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Line items</CardTitle>
+            <CardTitle>Line Items</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {form.items.map((item, index) => (
               <div
                 key={`item-${index}`}
-                className="grid gap-3 rounded-lg border border-border p-4 md:grid-cols-[2fr_1fr_1fr_1fr_auto]"
+                className="grid gap-3 rounded-lg border border-border p-4 md:grid-cols-[2fr_1fr_1fr_0.4fr_auto]"
               >
                 <div className="space-y-2">
                   <Label>Item</Label>
                   <Input
                     value={item.name}
-                    onChange={(event) => updateItem(index, "name", event.target.value)}
+                    onChange={(event) =>
+                      updateItem(index, "name", event.target.value)
+                    }
                   />
                 </div>
                 <div className="space-y-2">
@@ -364,17 +379,19 @@ export default function InvoiceEditor({ mode, initialData }) {
                     min="0"
                     step="0.01"
                     value={item.price}
-                    onChange={(event) => updateItem(index, "price", event.target.value)}
+                    onChange={(event) =>
+                      updateItem(index, "price", event.target.value)
+                    }
                   />
                 </div>
-                <div className="space-y-2">
+                {/* <div className="space-y-2">
                   <Label>Total</Label>
                   <Input value={item.total} readOnly />
-                </div>
-                <div className="flex items-end">
+                </div> */}
+                <div className="flex items-end justify-end">
                   <Button
                     variant="ghost"
-                    className= "cursor-pointer"
+                    className="cursor-pointer"
                     size="icon"
                     onClick={() => removeItem(index)}
                     disabled={form.items.length === 1}
@@ -414,7 +431,9 @@ export default function InvoiceEditor({ mode, initialData }) {
                 min="0"
                 step="0.01"
                 value={form.discount}
-                onChange={(event) => updateField("discount", event.target.value)}
+                onChange={(event) =>
+                  updateField("discount", event.target.value)
+                }
               />
             </div>
             <div className="space-y-2">
@@ -448,15 +467,21 @@ export default function InvoiceEditor({ mode, initialData }) {
           <Button onClick={handleSubmit} disabled={isSaving}>
             {isSaving ? "Saving..." : "Save invoice"}
           </Button>
-          <Button variant="outline" onClick={handleExport} disabled={isExporting}>
+          <Button
+            variant="outline"
+            onClick={handleExport}
+            disabled={isExporting}
+          >
             {isExporting ? "Exporting..." : "Export PDF"}
           </Button>
         </div>
       </div>
 
-      <div className="sticky top-6 self-start">
+      <div className="sticky top-6 -z-10 self-start">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-foreground">Live preview</h3>
+          <h3 className="text-lg font-semibold text-foreground">
+            Live Preview
+          </h3>
           <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
             Updated instantly
           </span>
