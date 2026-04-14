@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Dark mode activated by .dark class on <html> (admin theme toggle) */
+@variant dark (&:where(.dark, .dark *));
+
 :root {
   --background: 36 43% 97%;
   --foreground: 222 47% 11%;
@@ -20,6 +23,30 @@
   --border: 214 32% 91%;
   --input: 214 32% 91%;
   --ring: 221 83% 53%;
+}
+
+/* Dark theme overrides */
+.dark {
+  --background: 224 71% 4%;
+  --foreground: 213 31% 91%;
+  --card: 224 71% 7%;
+  --card-foreground: 213 31% 91%;
+  --popover: 224 71% 7%;
+  --popover-foreground: 213 31% 91%;
+  --primary: 221 83% 60%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 222 47% 13%;
+  --secondary-foreground: 213 31% 91%;
+  --muted: 223 47% 11%;
+  --muted-foreground: 215 20% 55%;
+  --accent: 223 47% 14%;
+  --accent-foreground: 213 31% 91%;
+  --destructive: 0 63% 50%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 222 47% 14%;
+  --input: 222 47% 14%;
+  --ring: 221 83% 60%;
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -62,7 +89,29 @@ body {
   box-shadow: 0 24px 70px rgba(15, 23, 42, 0.08);
 }
 
+.dark .glass {
+  background: linear-gradient(180deg, rgba(17, 24, 39, 0.9), rgba(17, 24, 39, 0.7));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
 .surface {
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(248, 250, 252, 0.9));
   border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.dark .surface {
+  background: linear-gradient(135deg, rgba(17, 24, 39, 0.95), rgba(30, 41, 59, 0.9));
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Admin sidebar scrollbar */
+.admin-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+.admin-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.admin-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
 }

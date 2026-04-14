@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Heart, ShieldCheck } from "lucide-react";
 
 const footerLinks = {
@@ -14,6 +17,11 @@ const footerLinks = {
 };
 
 export default function AppFooter() {
+  const pathname = usePathname();
+  const isAdminPage = pathname.startsWith("/admin-secure");
+
+  if (isAdminPage) return null;
+
   return (
     <footer className="w-full border-t border-white/8 bg-white backdrop-blur-xl mt-auto">
       <div className="max-w-6xl mx-auto px-4 lg:px-8 py-10">
