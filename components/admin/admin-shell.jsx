@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ThemeProvider } from "@/components/admin/theme-provider";
 import AdminSidebar from "@/components/admin/admin-sidebar";
 import AdminTopbar from "@/components/admin/admin-topbar";
@@ -10,9 +10,25 @@ export default function AdminShell({ user, children }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
+  // Lock root scroll to prevent double scrollbars
+  useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    
+    // Add overflow hidden to root elements
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    
+    return () => {
+      // Restore on unmount
+      html.style.overflow = "";
+      body.style.overflow = "";
+    };
+  }, []);
+
   return (
     <ThemeProvider>
-      <div className="flex h-screen overflow-hidden bg-background font-sans">
+      <div className="flex h-full overflow-hidden bg-background font-sans">
         {/* Mobile sidebar overlay */}
         {mobileSidebarOpen && (
           <div

@@ -38,7 +38,7 @@ export default function AdminTopbar({
       <button
         onClick={onDesktopToggle}
         aria-label="Toggle sidebar"
-        className="hidden h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:flex"
+        className="hidden h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:flex"
       >
         <Menu size={18} />
       </button>
@@ -58,7 +58,7 @@ export default function AdminTopbar({
           onClick={toggle}
           aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
           className={cn(
-            "flex h-9 w-9 items-center justify-center rounded-lg transition-colors",
+            "flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg transition-colors",
             "text-muted-foreground hover:bg-muted hover:text-foreground"
           )}
         >
@@ -68,7 +68,7 @@ export default function AdminTopbar({
         {/* Notifications (UI only) */}
         <button
           aria-label="Notifications"
-          className="relative flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="relative flex h-9 w-9 cursor-pointer items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <Bell size={18} />
           <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-violet-500" />
@@ -76,7 +76,7 @@ export default function AdminTopbar({
 
         {/* Admin avatar */}
         <div
-          className="flex h-9 w-9 items-center justify-center rounded-full bg-violet-600 text-sm font-bold text-white shadow-md"
+          className="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full bg-violet-600 text-sm font-bold text-white shadow-md"
           aria-label={`Signed in as ${user?.fullName ?? "Admin"}`}
         >
           {user?.fullName?.charAt(0).toUpperCase() ?? "A"}

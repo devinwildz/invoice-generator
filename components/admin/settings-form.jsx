@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { useForm } from "react-hook-form";
+import { useEffect, useState, useRef } from "react";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { siteSettingsSchema } from "@/lib/admin-validations";
 import { Button } from "@/components/ui/button";
@@ -11,8 +11,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/toast-provider";
 import { Upload, X, Image as ImageIcon, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useSiteSettings, useUpdateSiteSettings } from "@/hooks/useSiteSettings";
 
-function FileUploadZone({ label, icon: Icon, id, accept, hint }) {
+function FileUploadZone({ label, icon: Icon, id, accept, hint, value, onChange }) {
   const [fileName, setFileName] = useState(null);
   const inputRef = useRef(null);
 
@@ -32,17 +33,21 @@ function FileUploadZone({ label, icon: Icon, id, accept, hint }) {
         aria-label={`Upload ${label}`}
         onKeyDown={(e) => e.key === "Enter" && inputRef.current?.click()}
       >
-        {fileName ? (
+        {value || fileName ? (
           <>
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
               <Icon size={20} />
             </div>
             <p className="max-w-[200px] truncate text-sm font-medium text-foreground">
-              {fileName}
+              {value || fileName}
             </p>
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); setFileName(null); }}
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                setFileName(null);
+                onChange(""); 
+              }}
               className="flex items-center gap-1 text-xs text-muted-foreground hover:text-destructive"
             >
               <X size={12} /> Remove
@@ -68,7 +73,12 @@ function FileUploadZone({ label, icon: Icon, id, accept, hint }) {
         className="sr-only"
         onChange={(e) => {
           const file = e.target.files?.[0];
-          if (file) setFileName(file.name);
+          if (file) {
+            setFileName(file.name);
+            // In a real app, you'd upload to Supabase and get a URL here
+            // For now, we'll just simulate by using the file name
+            onChange(file.name);
+          }
         }}
         aria-label={`Upload ${label}`}
       />
@@ -76,32 +86,56 @@ function FileUploadZone({ label, icon: Icon, id, accept, hint }) {
   );
 }
 
-export default function SettingsForm({ initialValues }) {
+export default function SettingsForm() {
   const toast = useToast();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { data: settings, isLoading } = useSiteSettings();
+  const updateSettings = useUpdateSiteSettings();
 
   const {
     register,
     handleSubmit,
     formState: { errors, isDirty },
     reset,
+    control,
   } = useForm({
     resolver: zodResolver(siteSettingsSchema),
-    defaultValues: initialValues ?? {
-      siteTitle: "Invoice Studio",
-      footerText: "© 2025 Invoice Studio. All rights reserved.",
+    defaultValues: {
+      siteTitle: "Invoice Online",
+      footerText: "",
+      logo: "",
+      favicon: "",
     },
   });
 
+  // Load settings into form
+  useEffect(() => {
+    if (settings) {
+      reset({
+        siteTitle: settings.site_title,
+        footerText: settings.footer_text,
+        logo: settings.logo_url || "",
+        favicon: settings.favicon_url || "",
+      });
+    }
+  }, [settings, reset]);
+
   async function onSubmit(data) {
-    setIsSubmitting(true);
-    // Simulate API call
-    await new Promise((r) => setTimeout(r, 1000));
-    console.log("Settings saved:", data);
-    setIsSubmitting(false);
-    reset(data); // mark as clean
-    toast.push("Settings saved successfully!", "success");
+    try {
+      await updateSettings.mutateAsync({
+        site_title: data.siteTitle,
+        footer_text: data.footerText,
+        logo_url: data.logo,
+        favicon_url: data.favicon,
+      });
+      toast.push("Settings saved successfully!", "success");
+    } catch (err) {
+      toast.push("Failed to save settings.", "error");
+    }
   }
+
+  if (isLoading) return <div className="p-8 text-center text-muted-foreground animate-pulse">Loading settings...</div>;
+
+  const isSubmitting = updateSettings.isPending;
 
   return (
     <form
@@ -211,19 +245,35 @@ export default function SettingsForm({ initialValues }) {
         </div>
 
         <div className="grid gap-6 sm:grid-cols-2">
-          <FileUploadZone
-            id="logo-upload"
-            label="Logo"
-            icon={ImageIcon}
-            accept="image/png,image/jpeg,image/svg+xml,image/webp"
-            hint="PNG, JPG, SVG or WebP · Max 2MB"
+          <Controller
+            name="logo"
+            control={control}
+            render={({ field }) => (
+              <FileUploadZone
+                id="logo-upload"
+                label="Logo"
+                icon={ImageIcon}
+                accept="image/png,image/jpeg,image/svg+xml,image/webp"
+                hint="PNG, JPG, SVG or WebP · Max 2MB"
+                value={field.value}
+                onChange={field.onChange}
+              />
+            )}
           />
-          <FileUploadZone
-            id="favicon-upload"
-            label="Favicon"
-            icon={ImageIcon}
-            accept="image/png,image/x-icon,image/svg+xml"
-            hint="PNG, ICO or SVG · 32×32px recommended"
+          <Controller
+            name="favicon"
+            control={control}
+            render={({ field }) => (
+              <FileUploadZone
+                id="favicon-upload"
+                label="Favicon"
+                icon={ImageIcon}
+                accept="image/png,image/x-icon,image/svg+xml"
+                hint="PNG, ICO or SVG · 32×32px recommended"
+                value={field.value}
+                onChange={field.onChange}
+              />
+            )}
           />
         </div>
       </section>

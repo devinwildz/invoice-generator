@@ -3,7 +3,8 @@
 import { useState, useMemo } from "react";
 import {
   useAdminUsers,
-  useUpdateUserRole,
+  useUpdateUser,
+  useCreateUser,
   useDeleteUser,
 } from "@/hooks/useAdminUsers";
 import { Badge } from "@/components/ui/badge";
@@ -27,7 +28,7 @@ import {
 } from "@/components/ui/table";
 import { UsersTableSkeleton } from "@/components/admin/skeletons";
 import { useToast } from "@/components/ui/toast-provider";
-import { Search, Pencil, Trash2, ChevronLeft, ChevronRight, Users } from "lucide-react";
+import { Search, Pencil, Trash2, ChevronLeft, ChevronRight, Users, UserPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const ROLES = ["all", "admin", "customer"];
@@ -68,7 +69,8 @@ function UserAvatar({ user }) {
 export default function UsersClient() {
   const toast = useToast();
   const { data: users, isLoading, isError } = useAdminUsers();
-  const updateRole = useUpdateUserRole();
+  const updateUser = useUpdateUser();
+  const createUser = useCreateUser();
   const deleteUser = useDeleteUser();
 
   const [search, setSearch] = useState("");
@@ -80,7 +82,11 @@ export default function UsersClient() {
 
   // Edit modal state
   const [editUser, setEditUser] = useState(null);
-  const [editRole, setEditRole] = useState("customer");
+  const [editFormData, setEditFormData] = useState({ full_name: "", email: "", role: "customer" });
+
+  // Add modal state
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [addFormData, setAddFormData] = useState({ full_name: "", email: "", role: "customer" });
 
   // Delete confirm state
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -136,17 +142,43 @@ export default function UsersClient() {
   // Edit modal
   function openEdit(user) {
     setEditUser(user);
-    setEditRole(user.role);
+    setEditFormData({
+      full_name: user.full_name || "",
+      email: user.email || "",
+      role: user.role || "customer",
+    });
   }
 
   async function confirmEdit() {
     if (!editUser) return;
-    await updateRole.mutateAsync({ userId: editUser.id, role: editRole });
+    await updateUser.mutateAsync({ 
+      userId: editUser.id, 
+      userData: editFormData 
+    });
     toast.push(
-      `${editUser.full_name || "User"}'s role updated to ${editRole}.`,
+      `${editFormData.full_name || "User"}'s profile updated.`,
       "success"
     );
     setEditUser(null);
+  }
+
+  // Add modal
+  function openAdd() {
+    setAddFormData({ full_name: "", email: "", role: "customer" });
+    setIsAddOpen(true);
+  }
+
+  async function confirmAdd() {
+    if (!addFormData.email || !addFormData.full_name) {
+      toast.push("Please fill in all required fields.", "error");
+      return;
+    }
+    await createUser.mutateAsync(addFormData);
+    toast.push(
+      `User ${addFormData.full_name} has been added successfully.`,
+      "success"
+    );
+    setIsAddOpen(false);
   }
 
   // Delete
@@ -222,6 +254,15 @@ export default function UsersClient() {
             </option>
           ))}
         </select>
+
+        {/* Add User Button */}
+        <Button 
+          onClick={openAdd}
+          className="bg-violet-600 hover:bg-violet-700 text-white gap-2 h-10 px-4"
+        >
+          <UserPlus size={16} />
+          <span>Add User</span>
+        </Button>
       </div>
 
       {/* Table */}
@@ -238,7 +279,7 @@ export default function UsersClient() {
           </div>
         ) : (
           <Table>
-            <TableHeader>
+            <TableHeader className="dark:bg-slate-950/50">
               <TableRow>
                 <TableHead>
                   <button
@@ -302,7 +343,7 @@ export default function UsersClient() {
                         size="icon"
                         aria-label={`Edit ${user.full_name}`}
                         onClick={() => openEdit(user)}
-                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                        className="h-8 w-8 text-muted-foreground cursor-pointer dark:hover:bg-slate-800 hover:bg-slate-200 hover:text-foreground"
                       >
                         <Pencil size={14} />
                       </Button>
@@ -311,7 +352,7 @@ export default function UsersClient() {
                         size="icon"
                         aria-label={`Delete ${user.full_name}`}
                         onClick={() => setDeleteTarget(user)}
-                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        className="h-8 w-8 text-muted-foreground cursor-pointer hover:bg-destructive/10 hover:text-destructive"
                       >
                         <Trash2 size={14} />
                       </Button>
@@ -360,13 +401,13 @@ export default function UsersClient() {
         </div>
       )}
 
-      {/* Edit Role Dialog */}
+      {/* Edit User Dialog */}
       <Dialog open={!!editUser} onOpenChange={(o) => !o && setEditUser(null)}>
-        <DialogContent>
+        <DialogContent className="dark:bg-slate-800">
           <DialogHeader>
-            <DialogTitle>Edit User Role</DialogTitle>
+            <DialogTitle>Edit User</DialogTitle>
             <DialogDescription>
-              Change the role for{" "}
+              Update the profile information for{" "}
               <span className="font-semibold text-foreground">
                 {editUser?.full_name}
               </span>
@@ -386,37 +427,134 @@ export default function UsersClient() {
               </div>
             </div>
 
-            <div>
-              <label
-                htmlFor="edit-role-select"
-                className="mb-1.5 block text-sm font-medium text-foreground"
-              >
-                Role
-              </label>
-              <select
-                id="edit-role-select"
-                value={editRole}
-                onChange={(e) => setEditRole(e.target.value)}
-                className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              >
-                <option value="customer">Customer</option>
-                <option value="admin">Admin</option>
-              </select>
+            <div className="space-y-4">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">
+                  Full Name
+                </label>
+                <Input 
+                  value={editFormData.full_name}
+                  onChange={(e) => setEditFormData({ ...editFormData, full_name: e.target.value })}
+                  placeholder="John Doe"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">
+                  Email Address
+                </label>
+                <Input 
+                  type="email"
+                  value={editFormData.email}
+                  onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
+                  placeholder="john@example.com"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="edit-role-select"
+                  className="mb-1.5 block text-sm font-medium text-foreground"
+                >
+                  Role
+                </label>
+                <select
+                  id="edit-role-select"
+                  value={editFormData.role}
+                  onChange={(e) => setEditFormData({ ...editFormData, role: e.target.value })}
+                  className="h-10 w-full rounded-md dark:bg-slate-900 border border-input cursor-pointer px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option className="dark:bg-slate-800" value="customer">Customer</option>
+                  <option className="dark:bg-slate-800" value="admin">Admin</option>
+                </select>
+              </div>
             </div>
 
             <div className="flex gap-3 pt-2">
               <DialogClose asChild>
-                <Button variant="outline" size="sm" className="flex-1">
+                <Button variant="outline" size="sm" className="flex-1 dark:bg-slate-600 hover:dark:bg-slate-700">
                   Cancel
                 </Button>
               </DialogClose>
               <Button
                 size="sm"
-                className="flex-1"
+                className="flex-1 bg-violet-600 dark:bg-violet-600"
                 onClick={confirmEdit}
-                disabled={updateRole.isPending}
+                disabled={updateUser.isPending}
               >
-                {updateRole.isPending ? "Saving…" : "Save Changes"}
+                {updateUser.isPending ? "Saving…" : "Save Changes"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Add User Dialog */}
+      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+        <DialogContent className="dark:bg-slate-800">
+          <DialogHeader>
+            <DialogTitle>Add New User</DialogTitle>
+            <DialogDescription>
+              Create a new user account for the platform.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="mt-4 space-y-4">
+            <div className="space-y-4">
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">
+                  Full Name
+                </label>
+                <Input 
+                  value={addFormData.full_name}
+                  onChange={(e) => setAddFormData({ ...addFormData, full_name: e.target.value })}
+                  placeholder="John Doe"
+                />
+              </div>
+
+              <div>
+                <label className="mb-1.5 block text-sm font-medium text-foreground">
+                  Email Address
+                </label>
+                <Input 
+                  type="email"
+                  value={addFormData.email}
+                  onChange={(e) => setAddFormData({ ...addFormData, email: e.target.value })}
+                  placeholder="john@example.com"
+                />
+              </div>
+
+              <div>
+                <label
+                  htmlFor="add-role-select"
+                  className="mb-1.5 block text-sm font-medium text-foreground"
+                >
+                  Role
+                </label>
+                <select
+                  id="add-role-select"
+                  value={addFormData.role}
+                  onChange={(e) => setAddFormData({ ...addFormData, role: e.target.value })}
+                  className="h-10 w-full rounded-md dark:bg-slate-900 border border-input cursor-pointer px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option className="dark:bg-slate-800" value="customer">Customer</option>
+                  <option className="dark:bg-slate-800" value="admin">Admin</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <DialogClose asChild>
+                <Button variant="outline" size="sm" className="flex-1 dark:bg-slate-600 hover:dark:bg-slate-700">
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button
+                size="sm"
+                className="flex-1 bg-violet-600 dark:bg-violet-600"
+                onClick={confirmAdd}
+                disabled={createUser.isPending}
+              >
+                {createUser.isPending ? "Creating…" : "Create User"}
               </Button>
             </div>
           </div>
@@ -428,7 +566,7 @@ export default function UsersClient() {
         open={!!deleteTarget}
         onOpenChange={(o) => !o && setDeleteTarget(null)}
       >
-        <DialogContent>
+        <DialogContent className="dark:bg-slate-800">
           <DialogHeader>
             <DialogTitle>Delete User</DialogTitle>
             <DialogDescription>
@@ -441,7 +579,7 @@ export default function UsersClient() {
           </DialogHeader>
           <div className="mt-4 flex gap-3">
             <DialogClose asChild>
-              <Button variant="outline" size="sm" className="flex-1">
+              <Button variant="outline" size="sm" className="flex-1 dark:bg-slate-600 hover:dark:bg-slate-700">
                 Cancel
               </Button>
             </DialogClose>

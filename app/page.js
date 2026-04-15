@@ -1,21 +1,29 @@
 import Link from "next/link";
 import { getOptionalUser } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
+import AppFooter from "@/components/app/app-footer";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { BrandLogo, BrandName } from "@/components/app/branding";
 
 export default async function HomePage() {
   const user = await getOptionalUser();
+  const supabase = await createSupabaseServerClient();
+  const { data: settings } = await supabase
+    .from("site_settings")
+    .select("*")
+    .eq("id", 1)
+    .single();
+
+  const siteTitle = settings?.site_title || "Invoice Online";
+  const logoUrl = settings?.logo_url;
 
   return (
     <>
       <div className="bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] min-h-screen from-blue-50 via-amber-50 to-slate-100">
         <header className="flex px-6 py-6 w-full max-w-6xl mx-auto items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground font-semibold shadow-lg">
-              I O
-            </div>
-            <span className="text-sm uppercase tracking-[0.3em] text-muted-foreground">
-              Invoice Onlineinit
-            </span>
+            <BrandLogo logoUrl={logoUrl} siteTitle={siteTitle} />
+            <BrandName siteTitle={siteTitle} />
           </div>
           <div className="flex items-center gap-3">
             {user ? (
@@ -107,6 +115,7 @@ export default async function HomePage() {
           </main>
         </div>
       </div>
+      <AppFooter />
     </>
   );
 }

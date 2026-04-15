@@ -9,6 +9,7 @@ import {
   UserCircle,
   LogOut,
   Zap,
+  Menu as MenuIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -32,6 +33,11 @@ const NAV_LINKS = [
     href: `${BASE}/settings`,
     label: "Site Settings",
     icon: Settings,
+  },
+  {
+    href: `${BASE}/menus`,
+    label: "Menus",
+    icon: MenuIcon,
   },
   {
     href: `${BASE}/account`,

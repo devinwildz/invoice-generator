@@ -4,11 +4,21 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
-import { Home, User, History, LogOut } from "lucide-react";
+import { Home, User, History, LogOut, Laptop } from "lucide-react";
+import { useMenus } from "@/hooks/useNavigation";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export default function AppHeader({ user }) {
   const router = useRouter();
+  const { data: menus } = useMenus();
+  const { data: settings } = useSiteSettings();
   const [open, setOpen] = useState(false);
+
+  // Filter header links
+  const headerLinks = (menus || []).filter(m => m.position === "header");
+
+  const siteTitle = settings?.site_title || "Invoice Online";
+  const logoUrl = settings?.logo_url;
 
   const firstName = user?.fullName?.split(" ")[0] || "User";
   const initial = firstName.charAt(0).toUpperCase();
@@ -35,16 +45,33 @@ export default function AppHeader({ user }) {
         
         {/* LEFT */}
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground font-semibold shadow-lg">
-            I O
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground font-semibold shadow-lg overflow-hidden">
+            {logoUrl ? (
+              <img src={logoUrl} alt={siteTitle} className="h-full w-full object-cover" />
+            ) : (
+              "I O"
+            )}
           </div>
           <Link href="/">
-            <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">
-              Invoice Onlineinit
+            <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground whitespace-nowrap">
+              {siteTitle}
             </p>
             <p className="text-lg font-semibold text-foreground">Dashboard</p>
           </Link>
         </div>
+
+        {/* CENTER - Dynamic Links */}
+        <nav className="hidden md:flex items-center gap-8">
+          {headerLinks.map((link) => (
+            <Link 
+              key={link.id} 
+              href={link.href}
+              className="text-sm font-medium capitalize text-muted-foreground hover:text-primary transition-colors"
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
 
         {/* RIGHT */}
         <div className="relative flex items-center gap-3">

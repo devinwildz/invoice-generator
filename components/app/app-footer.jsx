@@ -3,8 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Heart, ShieldCheck } from "lucide-react";
+import { useMenus } from "@/hooks/useNavigation";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { useMemo } from "react";
 
-const footerLinks = {
+const DEFAULT_FOOTER_LINKS = {
   Navigation: [
     { label: "Home", href: "/" },
     { label: "My Account", href: "/dashboard" },
@@ -18,6 +21,26 @@ const footerLinks = {
 
 export default function AppFooter() {
   const pathname = usePathname();
+  const { data: menus } = useMenus();
+  const { data: settings } = useSiteSettings();
+  
+  const siteTitle = settings?.site_title || "Invoice Online";
+  const logoUrl = settings?.logo_url;
+  const footerText = settings?.footer_text;
+
+  const categories = useMemo(() => {
+    const footerItems = (menus || []).filter(m => m.position === "footer");
+    
+    if (footerItems.length === 0) return DEFAULT_FOOTER_LINKS;
+    
+    return footerItems.reduce((acc, item) => {
+      const cat = item.category || "General";
+      if (!acc[cat]) acc[cat] = [];
+      acc[cat].push(item);
+      return acc;
+    }, {});
+  }, [menus]);
+
   const isAdminPage = pathname.startsWith("/admin-secure");
 
   if (isAdminPage) return null;
@@ -29,11 +52,15 @@ export default function AppFooter() {
           {/* Brand */}
           <div className="lg:col-span-2 space-y-4">
             <Link href="/" className="flex items-center gap-3 w-fit group">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground font-semibold shadow-lg">
-                I O
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground font-semibold shadow-lg overflow-hidden">
+                {logoUrl ? (
+                  <img src={logoUrl} alt={siteTitle} className="h-full w-full object-cover" />
+                ) : (
+                  "I O"
+                )}
               </div>
               <p className="text-sm uppercase tracking-[0.2em] text-muted-foreground">
-                Invoice Onlineinit
+                {siteTitle}
               </p>
             </Link>
             <p className="text-sm text-slate-400 leading-relaxed max-w-xs">
@@ -47,19 +74,19 @@ export default function AppFooter() {
           </div>
 
           {/* Link columns */}
-          {Object.entries(footerLinks).map(([category, links]) => (
+          {Object.entries(categories).map(([category, links]) => (
             <div key={category} className="space-y-4">
               <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest">
                 {category}
               </h4>
               <ul className="space-y-2.5">
-                {links.map(({ label, href }) => (
-                  <li key={label}>
+                {links.map((link) => (
+                  <li key={link.label}>
                     <Link
-                      href={href}
+                      href={link.href}
                       className="text-sm font-medium text-slate-400 hover:text-blue-400 transition-colors"
                     >
-                      {label}
+                      {link.label}
                     </Link>
                   </li>
                 ))}
@@ -71,11 +98,10 @@ export default function AppFooter() {
         {/* Bottom bar */}
         <div className="mt-10 pt-6 border-t border-white/6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-xs text-slate-500 font-medium">
-            © {new Date().getFullYear()} Invoice Onlineinit. All rights reserved.
+            {footerText || `© ${new Date().getFullYear()} ${siteTitle}. All rights reserved.`}
           </p>
           <p className="flex items-center gap-1.5 text-xs text-slate-500 font-medium">
-            Made for{" "}
-            <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500" /> for
+            Made with <Heart className="w-3.5 h-3.5 text-red-500 fill-red-500" /> for
             modern teams
           </p>
         </div>

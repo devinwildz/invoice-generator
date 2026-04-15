@@ -8,11 +8,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import { BrandLogo, BrandName } from "@/components/app/branding";
 
 export default function ResetPasswordClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [status, setStatus] = useState("loading");
+  const { data: settings } = useSiteSettings();
   const [message, setMessage] = useState("Validating reset link...");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -99,12 +102,8 @@ export default function ResetPasswordClient() {
     <div className="grid gap-8 md:grid-cols-2">
       <div className="space-y-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground font-semibold shadow-lg">
-            I O
-          </div>
-          <span className="text-sm uppercase tracking-[0.3em] text-muted-foreground">
-            Invoice Onlineinit
-          </span>
+          <BrandLogo logoUrl={settings?.logo_url} siteTitle={settings?.site_title || "Invoice Online"} />
+          <BrandName siteTitle={settings?.site_title || "Invoice Online"} />
         </div>
         <h1 className="text-4xl font-semibold text-slate-900">
           Reset your password.
