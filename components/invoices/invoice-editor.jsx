@@ -347,60 +347,70 @@ export default function InvoiceEditor({ mode, initialData }) {
             <CardTitle>Line Items</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {form.items.map((item, index) => (
-              <div
-                key={`item-${index}`}
-                className="grid gap-3 rounded-lg border border-border p-4 md:grid-cols-[2fr_1fr_1fr_0.4fr_auto]"
-              >
-                <div className="space-y-2">
-                  <Label>Item</Label>
-                  <Input
-                    value={item.name}
-                    onChange={(event) =>
-                      updateItem(index, "name", event.target.value)
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Qty</Label>
-                  <Input
-                    type="number"
-                    min="1"
-                    value={item.quantity}
-                    onChange={(event) =>
-                      updateItem(index, "quantity", event.target.value)
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Price</Label>
-                  <Input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={item.price}
-                    onChange={(event) =>
-                      updateItem(index, "price", event.target.value)
-                    }
-                  />
-                </div>
-                {/* <div className="space-y-2">
-                  <Label>Total</Label>
-                  <Input value={item.total} readOnly />
-                </div> */}
-                <div className="flex items-end justify-end">
+            <div className="space-y-5">
+              {form.items.map((item, index) => (
+                <div
+                  key={`item-${index}`}
+                  className="relative space-y-4 rounded-xl border border-border bg-muted/30 p-5 pt-10"
+                >
                   <Button
                     variant="ghost"
-                    className="cursor-pointer"
+                    className="absolute right-2 top-2 h-7 w-7 rounded-full text-muted-foreground hover:bg-destructive/10 hover:text-destructive cursor-pointer"
                     size="icon"
                     onClick={() => removeItem(index)}
                     disabled={form.items.length === 1}
+                    type="button"
                   >
-                    ✕
+                    <span className="text-xs">✕</span>
                   </Button>
+
+                  <div className="space-y-2">
+                    <Label className="text-xs uppercase tracking-wider text-muted-foreground">Item Description</Label>
+                    <Input
+                      placeholder="e.g. Web Development Services"
+                      className="bg-background font-medium"
+                      value={item.name}
+                      onChange={(event) =>
+                        updateItem(index, "name", event.target.value)
+                      }
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="text-xs uppercase tracking-wider text-muted-foreground">Qty</Label>
+                      <Input
+                        type="number"
+                        min="1"
+                        className="bg-background"
+                        value={item.quantity}
+                        onChange={(event) =>
+                          updateItem(index, "quantity", event.target.value)
+                        }
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs uppercase tracking-wider text-muted-foreground">Price</Label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground font-medium">
+                          {form.currency === "INR" ? "₹" : "$"}
+                        </span>
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          className="bg-background pl-7"
+                          value={item.price}
+                          onChange={(event) =>
+                            updateItem(index, "price", event.target.value)
+                          }
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
             <Button variant="outline" onClick={addItem}>
               Add item
             </Button>

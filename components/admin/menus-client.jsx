@@ -115,7 +115,7 @@ export default function MenusClient() {
             <Layout className="w-5 h-5 text-blue-500" />
             <h3 className="text-lg font-semibold">Header Menu</h3>
           </div>
-          <Button size="sm" onClick={() => openAdd("header")} className="gap-2">
+          <Button size="sm" onClick={() => openAdd("header")} className="gap-2 bg-violet-600">
             <Plus size={16} /> Add Link
           </Button>
         </div>
@@ -136,7 +136,7 @@ export default function MenusClient() {
             <Layout className="w-5 h-5 text-violet-500" />
             <h3 className="text-lg font-semibold">Footer Menu</h3>
           </div>
-          <Button size="sm" onClick={() => openAdd("footer")} className="gap-2">
+          <Button size="sm" onClick={() => openAdd("footer")} className="gap-2 bg-violet-600">
             <Plus size={16} /> Add Link
           </Button>
         </div>
@@ -218,7 +218,7 @@ export default function MenusClient() {
 
             <div className="flex gap-3 pt-2">
               <DialogClose asChild>
-                <Button type="button" variant="outline" className="flex-1">Cancel</Button>
+                <Button type="button" variant="outline" className="flex-1 dark:bg-slate-600 hover:dark:bg-slate-700">Cancel</Button>
               </DialogClose>
               <Button type="submit" className="flex-1 bg-violet-600 hover:bg-violet-700">
                 {editingItem ? "Save Changes" : "Create Link"}
@@ -242,7 +242,7 @@ function MenuTable({ items, onEdit, onDelete, isFooter }) {
 
   return (
     <Table>
-      <TableHeader>
+      <TableHeader className="dark:bg-slate-800">
         <TableRow>
           <TableHead className="w-[40%]">Label</TableHead>
           <TableHead className="w-[30%]">URL</TableHead>
@@ -254,7 +254,7 @@ function MenuTable({ items, onEdit, onDelete, isFooter }) {
       <TableBody>
         {items.map((item) => (
           <TableRow key={item.id}>
-            <TableCell className="font-medium text-foreground">{item.label}</TableCell>
+            <TableCell className="font-medium text-foreground capitalize">{item.label}</TableCell>
             <TableCell>
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <span className="truncate max-w-[150px]">{item.href}</span>
@@ -276,7 +276,7 @@ function MenuTable({ items, onEdit, onDelete, isFooter }) {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                  className="h-8 w-8 text-muted-foreground dark:hover:bg-slate-800 hover:bg-slate-200 hover:text-foreground"
                   onClick={() => onEdit(item)}
                 >
                   <Pencil size={14} />
@@ -284,7 +284,7 @@ function MenuTable({ items, onEdit, onDelete, isFooter }) {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="h-8 w-8 text-muted-foreground hover:text-red-500"
+                  className="h-8 w-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
                   onClick={() => onDelete(item.id)}
                 >
                   <Trash2 size={14} />

@@ -53,7 +53,7 @@ function StatCard({ stat }) {
             ) : (
               <ArrowDownRight size={14} />
             )}
-            <span>{stat.change} from last month</span>
+            <span>{stat.change}</span>
           </div>
         </div>
         <div className={cn("flex h-12 w-12 items-center justify-center rounded-2xl", iconClass)}>

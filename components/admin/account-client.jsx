@@ -9,13 +9,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/toast-provider";
-import { User, Lock, Save, KeyRound } from "lucide-react";
+import { User, Lock, Save, KeyRound, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export default function AccountClient({ user }) {
   const toast = useToast();
   const [profileLoading, setProfileLoading] = useState(false);
   const [passwordLoading, setPasswordLoading] = useState(false);
+  const [showCurrent, setShowCurrent] = useState(false);
+  const [showNew, setShowNew] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   // Profile Form
   const {
@@ -134,12 +137,24 @@ export default function AccountClient({ user }) {
             <div className="space-y-4">
               <div className="space-y-1.5">
                 <Label htmlFor="currentPassword">Current Password</Label>
-                <Input
-                  id="currentPassword"
-                  type="password"
-                  {...regPassword("currentPassword")}
-                  className={cn(passwordErrors.currentPassword && "border-destructive")}
-                />
+                <div className="relative">
+                  <Input
+                    id="currentPassword"
+                    type={showCurrent ? "text" : "password"}
+                    {...regPassword("currentPassword")}
+                    className={cn(
+                      "pr-10",
+                      passwordErrors.currentPassword && "border-destructive"
+                    )}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowCurrent(!showCurrent)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
+                  >
+                    {showCurrent ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
                 {passwordErrors.currentPassword && (
                   <p className="text-xs text-destructive">{passwordErrors.currentPassword.message}</p>
                 )}
@@ -147,24 +162,48 @@ export default function AccountClient({ user }) {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-1.5">
                   <Label htmlFor="newPassword">New Password</Label>
-                  <Input
-                    id="newPassword"
-                    type="password"
-                    {...regPassword("newPassword")}
-                    className={cn(passwordErrors.newPassword && "border-destructive")}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="newPassword"
+                      type={showNew ? "text" : "password"}
+                      {...regPassword("newPassword")}
+                      className={cn(
+                        "pr-10",
+                        passwordErrors.newPassword && "border-destructive"
+                      )}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNew(!showNew)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
+                    >
+                      {showNew ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
                   {passwordErrors.newPassword && (
                     <p className="text-xs text-destructive">{passwordErrors.newPassword.message}</p>
                   )}
                 </div>
                 <div className="space-y-1.5">
                   <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    {...regPassword("confirmPassword")}
-                    className={cn(passwordErrors.confirmPassword && "border-destructive")}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      type={showConfirm ? "text" : "password"}
+                      {...regPassword("confirmPassword")}
+                      className={cn(
+                        "pr-10",
+                        passwordErrors.confirmPassword && "border-destructive"
+                      )}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirm(!showConfirm)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
+                    >
+                      {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
                   {passwordErrors.confirmPassword && (
                     <p className="text-xs text-destructive">{passwordErrors.confirmPassword.message}</p>
                   )}

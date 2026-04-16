@@ -32,7 +32,6 @@ import { Search, Pencil, Trash2, ChevronLeft, ChevronRight, Users, UserPlus } fr
 import { cn } from "@/lib/utils";
 
 const ROLES = ["all", "admin", "customer"];
-const STATUSES = ["all", "active", "inactive"];
 const PAGE_SIZE = 8;
 
 function RoleBadge({ role }) {
@@ -49,13 +48,6 @@ function RoleBadge({ role }) {
   );
 }
 
-function StatusBadge({ status }) {
-  return (
-    <Badge variant={status === "active" ? "success" : "warning"}>
-      {status === "active" ? "Active" : "Inactive"}
-    </Badge>
-  );
-}
 
 function UserAvatar({ user }) {
   const initial = (user.full_name || user.email || "U").charAt(0).toUpperCase();
@@ -75,7 +67,6 @@ export default function UsersClient() {
 
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
   const [sortField, setSortField] = useState("full_name");
   const [sortDir, setSortDir] = useState("asc");
   const [page, setPage] = useState(1);
@@ -101,10 +92,7 @@ export default function UsersClient() {
           (u.full_name || "").toLowerCase().includes(q) ||
           (u.email || "").toLowerCase().includes(q);
         const matchRole = roleFilter === "all" || u.role === roleFilter;
-        // Status filter is currently dummy if status column doesn't exist yet, 
-        // but we'll leave it for UI consistency if the user adds it later.
-        const matchStatus = statusFilter === "all" || (u.status || "active") === statusFilter;
-        return matchSearch && matchRole && matchStatus;
+        return matchSearch && matchRole;
       })
       .sort((a, b) => {
         const dir = sortDir === "asc" ? 1 : -1;
@@ -112,7 +100,7 @@ export default function UsersClient() {
         const vb = b[sortField] ?? "";
         return va > vb ? dir : va < vb ? -dir : 0;
       });
-  }, [users, search, roleFilter, statusFilter, sortField, sortDir]);
+  }, [users, search, roleFilter, sortField, sortDir]);
 
   // Pagination
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
@@ -151,15 +139,19 @@ export default function UsersClient() {
 
   async function confirmEdit() {
     if (!editUser) return;
-    await updateUser.mutateAsync({ 
-      userId: editUser.id, 
-      userData: editFormData 
-    });
-    toast.push(
-      `${editFormData.full_name || "User"}'s profile updated.`,
-      "success"
-    );
-    setEditUser(null);
+    try {
+      await updateUser.mutateAsync({ 
+        userId: editUser.id, 
+        userData: editFormData 
+      });
+      toast.push(
+        `${editFormData.full_name || "User"}'s profile updated.`,
+        "success"
+      );
+      setEditUser(null);
+    } catch (error) {
+      toast.push(error.message || "Failed to update user profile.", "error");
+    }
   }
 
   // Add modal
@@ -173,12 +165,16 @@ export default function UsersClient() {
       toast.push("Please fill in all required fields.", "error");
       return;
     }
-    await createUser.mutateAsync(addFormData);
-    toast.push(
-      `User ${addFormData.full_name} has been added successfully.`,
-      "success"
-    );
-    setIsAddOpen(false);
+    try {
+      await createUser.mutateAsync(addFormData);
+      toast.push(
+        `User ${addFormData.full_name} has been added successfully.`,
+        "success"
+      );
+      setIsAddOpen(false);
+    } catch (error) {
+      toast.push(error.message || "Database error saving new user.", "error");
+    }
   }
 
   // Delete
@@ -240,20 +236,6 @@ export default function UsersClient() {
           ))}
         </select>
 
-        {/* Status filter */}
-        <select
-          id="admin-users-status-filter"
-          value={statusFilter}
-          onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-          aria-label="Filter by status"
-          className="h-10 rounded-md border border-input bg-background px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-        >
-          {STATUSES.map((s) => (
-            <option key={s} value={s}>
-              {s === "all" ? "All Statuses" : s.charAt(0).toUpperCase() + s.slice(1)}
-            </option>
-          ))}
-        </select>
 
         {/* Add User Button */}
         <Button 
@@ -279,7 +261,7 @@ export default function UsersClient() {
           </div>
         ) : (
           <Table>
-            <TableHeader className="dark:bg-slate-950/50">
+            <TableHeader className="dark:bg-slate-800">
               <TableRow>
                 <TableHead>
                   <button
@@ -298,11 +280,7 @@ export default function UsersClient() {
                   </button>
                 </TableHead>
                 <TableHead>Role</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="hidden sm:table-cell">
-                  Actions
-                </TableHead>
-                <TableHead className="text-right">Manage</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -329,12 +307,6 @@ export default function UsersClient() {
                   </TableCell>
                   <TableCell>
                     <RoleBadge role={user.role} />
-                  </TableCell>
-                  <TableCell>
-                    <StatusBadge status={user.status || "active"} />
-                  </TableCell>
-                  <TableCell className="hidden text-sm text-muted-foreground sm:table-cell">
-                    -
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center justify-end gap-2">
@@ -478,7 +450,7 @@ export default function UsersClient() {
               </DialogClose>
               <Button
                 size="sm"
-                className="flex-1 bg-violet-600 dark:bg-violet-600"
+                className="flex-1 bg-violet-600"
                 onClick={confirmEdit}
                 disabled={updateUser.isPending}
               >

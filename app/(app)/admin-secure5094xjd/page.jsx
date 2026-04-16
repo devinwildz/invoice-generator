@@ -3,10 +3,13 @@ import OverviewCards from "@/components/admin/overview-cards";
 import RevenueChart from "@/components/admin/revenue-chart";
 import ActivityFeed from "@/components/admin/activity-feed";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { ADMIN_STATS, MONTHLY_REVENUE, RECENT_ACTIVITY } from "@/lib/admin-data";
+import { MONTHLY_REVENUE } from "@/lib/admin-data";
+import { getAdminDashboardStats } from "@/services/admin";
 import { OverviewCardsSkeleton, ChartSkeleton, ActivitySkeleton } from "@/components/admin/skeletons";
 
-export default function AdminDashboardPage() {
+export default async function AdminDashboardPage() {
+  const { stats, activities } = await getAdminDashboardStats();
+
   return (
     <div className="space-y-6">
       <header>
@@ -16,7 +19,7 @@ export default function AdminDashboardPage() {
 
       {/* Stats Cards */}
       <Suspense fallback={<OverviewCardsSkeleton />}>
-        <OverviewCards stats={ADMIN_STATS} />
+        <OverviewCards stats={stats} />
       </Suspense>
 
       <div className="grid gap-6 lg:grid-cols-7">
@@ -43,7 +46,7 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <Suspense fallback={<ActivitySkeleton />}>
-              <ActivityFeed activities={RECENT_ACTIVITY} />
+              <ActivityFeed activities={activities} />
             </Suspense>
           </CardContent>
         </Card>

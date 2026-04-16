@@ -30,6 +30,31 @@ const TYPE_CONFIG = {
   },
 };
 
+function formatRelativeTime(dateString) {
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return dateString;
+
+    const now = new Date();
+    const diffInSeconds = Math.floor((now - date) / 1000);
+
+    if (diffInSeconds < 60) return "just now";
+    
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+    
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    if (diffInHours < 24) return `${diffInHours}h ago`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `${diffInDays}d ago`;
+    
+    return date.toLocaleDateString();
+  } catch (e) {
+    return dateString;
+  }
+}
+
 function ActivityItem({ item }) {
   const config = TYPE_CONFIG[item.type] ?? TYPE_CONFIG.settings;
   const Icon = config.icon;
@@ -53,7 +78,7 @@ function ActivityItem({ item }) {
         className="shrink-0 text-[11px] text-muted-foreground"
         dateTime={item.time}
       >
-        {item.time}
+        {formatRelativeTime(item.time)}
       </time>
     </li>
   );

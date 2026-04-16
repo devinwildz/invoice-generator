@@ -50,12 +50,12 @@ async function createUser(userData) {
   const supabase = createSupabaseBrowserClient();
   const { data, error } = await supabase
     .from("users")
-    .insert([
+    .upsert([
       {
+        id: userData.id || crypto.randomUUID(),
         full_name: userData.full_name,
         email: userData.email,
         role: userData.role || "customer",
-        status: "active",
         created_at: new Date().toISOString(),
       },
     ])

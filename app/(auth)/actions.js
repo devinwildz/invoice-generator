@@ -68,6 +68,25 @@ export async function signupAction(prevState, formData) {
     return { error: error.message };
   }
 
+  // Proactively create profile in public.users
+  if (data?.user) {
+    try {
+      const { error: insertError } = await supabase.from("users").upsert({
+        id: data.user.id,
+        email: data.user.email,
+        full_name: parsed.data.fullName,
+        role: "customer",
+        created_at: new Date().toISOString(),
+      });
+      
+      if (insertError) {
+        console.error("Profile sync failed in signupAction:", insertError.message);
+      }
+    } catch (e) {
+      console.error("Unexpected error syncing profile after signup:", e);
+    }
+  }
+
   if (data?.session) {
     await supabase.auth.signOut();
   }
